@@ -27,16 +27,49 @@ uv sync
 # Run the application (recommended)
 ./run.sh
 
-# Run manually
-cd backend && uv run uvicorn app:app --reload --port 8000
-
-# Run without hot reload (production)
-cd backend && uv run uvicorn app:app --port 8000
+# Or use make commands
+make dev         # Run with hot reload
+make run         # Run production server
 ```
 
 The application serves both the API and frontend at `http://localhost:8000`:
 - Web interface: `http://localhost:8000`
 - API documentation: `http://localhost:8000/docs`
+
+### Code Quality & Testing
+
+```bash
+# Run all quality checks (format + lint + type check)
+make check
+
+# Individual tools
+make format      # Auto-format with black and ruff
+make lint        # Run ruff linter (no auto-fix)
+make mypy        # Run type checking
+
+# Testing
+make test                # Run all tests
+make test-coverage       # Run tests with coverage report
+
+# Utilities
+make clean       # Remove cache and temporary files
+make help        # Show all available commands
+```
+
+### Pre-commit Hooks (Optional)
+
+To automatically run quality checks before each commit:
+
+```bash
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run manually on all files
+uv run pre-commit run --all-files
+
+# Skip hooks for a single commit (use sparingly)
+git commit --no-verify
+```
 
 ### Environment Setup
 
@@ -143,6 +176,50 @@ All settings centralized in `backend/config.py`:
 - `MAX_RESULTS`: Number of search results returned (default: 5)
 - `MAX_HISTORY`: Conversation exchanges to remember (default: 2)
 - `CHROMA_PATH`: Vector database location (default: ./chroma_db)
+
+## Code Quality Tools
+
+The project uses industry-standard Python code quality tools:
+
+### Black (Code Formatter)
+- Automatic code formatting for consistent style
+- Line length: 88 characters
+- Configuration in `pyproject.toml` under `[tool.black]`
+- Run: `make format` or `uv run black backend/`
+
+### Ruff (Linter)
+- Fast Python linter (replaces flake8, isort, pyupgrade)
+- Checks for code style, potential bugs, and best practices
+- Automatically fixes many issues with `--fix` flag
+- Configuration in `pyproject.toml` under `[tool.ruff]`
+- Run: `make lint` or `uv run ruff check backend/`
+
+### Mypy (Type Checker)
+- Static type checking for Python
+- Helps catch type-related bugs before runtime
+- Configured for gradual typing (not strict mode)
+- Configuration in `pyproject.toml` under `[tool.mypy]`
+- Run: `make mypy` or `uv run mypy backend/`
+
+### Development Workflow
+
+**Before committing code:**
+```bash
+make check  # Runs format + lint + mypy
+```
+
+**Or install pre-commit hooks:**
+```bash
+uv run pre-commit install
+# Now quality checks run automatically on git commit
+```
+
+**Tool execution order:**
+1. `black` - Formats code to consistent style
+2. `ruff` - Lints and auto-fixes issues
+3. `mypy` - Type checks the code
+
+All tools are configured to work together harmoniously (e.g., ruff ignores E501 since black handles line length).
 
 ## Key Files
 
