@@ -1,8 +1,9 @@
 """
 Integration tests for RAG system handling content queries
 """
-import pytest
+
 from unittest.mock import Mock, patch
+
 from rag_system import RAGSystem
 
 
@@ -30,11 +31,15 @@ class TestRAGSystemIntegration:
         assert len(tool_defs) >= 2  # At least search and outline tools
 
         # Find search tool
-        search_tool = next((t for t in tool_defs if t['name'] == 'search_course_content'), None)
+        search_tool = next(
+            (t for t in tool_defs if t["name"] == "search_course_content"), None
+        )
         assert search_tool is not None
 
         # Find outline tool
-        outline_tool = next((t for t in tool_defs if t['name'] == 'get_course_outline'), None)
+        outline_tool = next(
+            (t for t in tool_defs if t["name"] == "get_course_outline"), None
+        )
         assert outline_tool is not None
 
     def test_add_course_document(self, test_config, tmp_path):
@@ -85,7 +90,9 @@ This lesson covers advanced topics in the subject matter.
         mock_text.type = "text"
         mock_response.content = [mock_text]
 
-        with patch.object(rag.ai_generator.client.messages, 'create', return_value=mock_response):
+        with patch.object(
+            rag.ai_generator.client.messages, "create", return_value=mock_response
+        ):
             answer, sources = rag.query("What is machine learning?")
 
             assert answer is not None
@@ -116,11 +123,13 @@ This lesson covers advanced topics in the subject matter.
         final_response = Mock()
         final_response.stop_reason = "end_turn"
         mock_text = Mock()
-        mock_text.text = "Based on the course content, Machine Learning is a subset of AI."
+        mock_text.text = (
+            "Based on the course content, Machine Learning is a subset of AI."
+        )
         mock_text.type = "text"
         final_response.content = [mock_text]
 
-        with patch.object(rag.ai_generator.client.messages, 'create') as mock_create:
+        with patch.object(rag.ai_generator.client.messages, "create") as mock_create:
             mock_create.side_effect = [first_response, final_response]
 
             answer, sources = rag.query("What is machine learning?")
@@ -150,7 +159,9 @@ This lesson covers advanced topics in the subject matter.
         mock_text.type = "text"
         mock_response.content = [mock_text]
 
-        with patch.object(rag.ai_generator.client.messages, 'create', return_value=mock_response):
+        with patch.object(
+            rag.ai_generator.client.messages, "create", return_value=mock_response
+        ):
             # Create session
             session_id = rag.session_manager.create_session()
 
@@ -181,7 +192,7 @@ This lesson covers advanced topics in the subject matter.
         mock_tool_use.name = "search_course_content"
         mock_tool_use.input = {
             "query": "neural networks",
-            "course_name": "Test Course on AI"
+            "course_name": "Test Course on AI",
         }
 
         first_response = Mock()
@@ -196,7 +207,7 @@ This lesson covers advanced topics in the subject matter.
         mock_text.type = "text"
         final_response.content = [mock_text]
 
-        with patch.object(rag.ai_generator.client.messages, 'create') as mock_create:
+        with patch.object(rag.ai_generator.client.messages, "create") as mock_create:
             mock_create.side_effect = [first_response, final_response]
 
             answer, sources = rag.query("Tell me about neural networks")
@@ -208,8 +219,8 @@ This lesson covers advanced topics in the subject matter.
             # Sources should have expected structure
             if len(sources) > 0:
                 assert isinstance(sources[0], dict)
-                assert 'text' in sources[0]
-                assert 'link' in sources[0]
+                assert "text" in sources[0]
+                assert "link" in sources[0]
 
     def test_get_course_analytics(self, test_config, mock_course_data):
         """Test course analytics retrieval"""
@@ -223,10 +234,10 @@ This lesson covers advanced topics in the subject matter.
         analytics = rag.get_course_analytics()
 
         assert analytics is not None
-        assert 'total_courses' in analytics
-        assert 'course_titles' in analytics
-        assert analytics['total_courses'] == 1
-        assert "Test Course on AI" in analytics['course_titles']
+        assert "total_courses" in analytics
+        assert "course_titles" in analytics
+        assert analytics["total_courses"] == 1
+        assert "Test Course on AI" in analytics["course_titles"]
 
     def test_empty_vector_store_query(self, test_config):
         """Test query behavior with empty vector store"""
@@ -240,7 +251,9 @@ This lesson covers advanced topics in the subject matter.
         mock_text.type = "text"
         mock_response.content = [mock_text]
 
-        with patch.object(rag.ai_generator.client.messages, 'create', return_value=mock_response):
+        with patch.object(
+            rag.ai_generator.client.messages, "create", return_value=mock_response
+        ):
             answer, sources = rag.query("What is machine learning?")
 
             # Should still return a response
@@ -259,7 +272,7 @@ This lesson covers advanced topics in the subject matter.
         result = rag.tool_manager.execute_tool(
             "search_course_content",
             query="machine learning",
-            course_name="Test Course on AI"
+            course_name="Test Course on AI",
         )
 
         assert result is not None
@@ -281,8 +294,7 @@ This lesson covers advanced topics in the subject matter.
 
         # Execute outline tool
         result = rag.tool_manager.execute_tool(
-            "get_course_outline",
-            course_name="Test Course"
+            "get_course_outline", course_name="Test Course"
         )
 
         assert result is not None

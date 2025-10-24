@@ -1,24 +1,25 @@
 """
 Shared test fixtures for RAG chatbot tests
 """
-import pytest
-import tempfile
-import shutil
+
 import os
+import shutil
 import sys
+import tempfile
 from typing import List, Tuple
 from unittest.mock import MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 
-# Add parent directory to path to import modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import pytest
 
-from models import Course, Lesson, CourseChunk
-from vector_store import VectorStore
-from document_processor import DocumentProcessor
-from search_tools import CourseSearchTool, CourseOutlineTool, ToolManager
+# Add parent directory to path to import modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from config import Config
 from rag_system import RAGSystem
+from models import Course, CourseChunk, Lesson
+from search_tools import CourseOutlineTool, CourseSearchTool, ToolManager
+from vector_store import VectorStore
 
 
 @pytest.fixture
@@ -53,19 +54,19 @@ def mock_course_data():
             Lesson(
                 lesson_number=0,
                 title="Introduction to AI",
-                lesson_link="https://example.com/lesson/0"
+                lesson_link="https://example.com/lesson/0",
             ),
             Lesson(
                 lesson_number=1,
                 title="Machine Learning Basics",
-                lesson_link="https://example.com/lesson/1"
+                lesson_link="https://example.com/lesson/1",
             ),
             Lesson(
                 lesson_number=2,
                 title="Deep Learning Fundamentals",
-                lesson_link="https://example.com/lesson/2"
-            )
-        ]
+                lesson_link="https://example.com/lesson/2",
+            ),
+        ],
     )
 
     chunks = [
@@ -73,32 +74,32 @@ def mock_course_data():
             content="Lesson 0 content: Artificial Intelligence is the simulation of human intelligence by machines. It involves learning, reasoning, and self-correction.",
             course_title="Test Course on AI",
             lesson_number=0,
-            chunk_index=0
+            chunk_index=0,
         ),
         CourseChunk(
             content="AI has many applications including natural language processing, computer vision, and robotics.",
             course_title="Test Course on AI",
             lesson_number=0,
-            chunk_index=1
+            chunk_index=1,
         ),
         CourseChunk(
             content="Course Test Course on AI Lesson 1 content: Machine Learning is a subset of AI that enables systems to learn from data. Supervised learning uses labeled data.",
             course_title="Test Course on AI",
             lesson_number=1,
-            chunk_index=2
+            chunk_index=2,
         ),
         CourseChunk(
             content="Unsupervised learning finds patterns in unlabeled data. Common algorithms include k-means clustering and principal component analysis.",
             course_title="Test Course on AI",
             lesson_number=1,
-            chunk_index=3
+            chunk_index=3,
         ),
         CourseChunk(
             content="Course Test Course on AI Lesson 2 content: Deep Learning uses neural networks with multiple layers. Convolutional neural networks are used for image processing.",
             course_title="Test Course on AI",
             lesson_number=2,
-            chunk_index=4
-        )
+            chunk_index=4,
+        ),
     ]
 
     return course, chunks
@@ -112,7 +113,7 @@ def vector_store_with_data(test_config, mock_course_data):
     store = VectorStore(
         chroma_path=test_config.CHROMA_PATH,
         embedding_model=test_config.EMBEDDING_MODEL,
-        max_results=test_config.MAX_RESULTS
+        max_results=test_config.MAX_RESULTS,
     )
 
     # Add course metadata and content
@@ -146,6 +147,7 @@ def tool_manager(course_search_tool, course_outline_tool):
 @pytest.fixture
 def mock_anthropic_response_no_tools():
     """Mock Anthropic API response without tool use"""
+
     class MockContent:
         def __init__(self, text):
             self.text = text
@@ -162,6 +164,7 @@ def mock_anthropic_response_no_tools():
 @pytest.fixture
 def mock_anthropic_response_with_tool():
     """Mock Anthropic API response with tool use"""
+
     class MockToolContent:
         def __init__(self):
             self.type = "tool_use"
@@ -170,7 +173,7 @@ def mock_anthropic_response_with_tool():
             self.input = {
                 "query": "machine learning",
                 "course_name": None,
-                "lesson_number": None
+                "lesson_number": None,
             }
 
     class MockResponse:
@@ -184,6 +187,7 @@ def mock_anthropic_response_with_tool():
 @pytest.fixture
 def mock_anthropic_response_final():
     """Mock final Anthropic API response after tool execution"""
+
     class MockContent:
         def __init__(self, text):
             self.text = text
@@ -191,7 +195,11 @@ def mock_anthropic_response_final():
 
     class MockResponse:
         def __init__(self):
-            self.content = [MockContent("Machine Learning is a subset of AI that enables systems to learn from data.")]
+            self.content = [
+                MockContent(
+                    "Machine Learning is a subset of AI that enables systems to learn from data."
+                )
+            ]
             self.stop_reason = "end_turn"
 
     return MockResponse()

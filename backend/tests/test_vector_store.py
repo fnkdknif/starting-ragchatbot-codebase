@@ -1,8 +1,8 @@
 """
 Tests for VectorStore component
 """
-import pytest
-from vector_store import VectorStore, SearchResults
+
+from vector_store import VectorStore
 
 
 class TestVectorStore:
@@ -13,7 +13,7 @@ class TestVectorStore:
         store = VectorStore(
             chroma_path=test_config.CHROMA_PATH,
             embedding_model=test_config.EMBEDDING_MODEL,
-            max_results=test_config.MAX_RESULTS
+            max_results=test_config.MAX_RESULTS,
         )
         assert store is not None
         assert store.max_results == test_config.MAX_RESULTS
@@ -25,7 +25,7 @@ class TestVectorStore:
         store = VectorStore(
             chroma_path=test_config.CHROMA_PATH,
             embedding_model=test_config.EMBEDDING_MODEL,
-            max_results=test_config.MAX_RESULTS
+            max_results=test_config.MAX_RESULTS,
         )
         course, _ = mock_course_data
 
@@ -45,7 +45,7 @@ class TestVectorStore:
         store = VectorStore(
             chroma_path=test_config.CHROMA_PATH,
             embedding_model=test_config.EMBEDDING_MODEL,
-            max_results=test_config.MAX_RESULTS
+            max_results=test_config.MAX_RESULTS,
         )
         _, chunks = mock_course_data
 
@@ -55,7 +55,7 @@ class TestVectorStore:
         # Verify content was added by searching
         results = store.course_content.get()
         assert results is not None
-        assert len(results['ids']) == len(chunks)
+        assert len(results["ids"]) == len(chunks)
 
     def test_search_without_filters(self, vector_store_with_data):
         """Test basic search without filters"""
@@ -70,8 +70,7 @@ class TestVectorStore:
         """Test search with course name filter"""
         # Search with full course name
         results = vector_store_with_data.search(
-            query="artificial intelligence",
-            course_name="Test Course on AI"
+            query="artificial intelligence", course_name="Test Course on AI"
         )
 
         assert not results.is_empty()
@@ -79,13 +78,12 @@ class TestVectorStore:
 
         # Verify all results are from the correct course
         for meta in results.metadata:
-            assert meta['course_title'] == "Test Course on AI"
+            assert meta["course_title"] == "Test Course on AI"
 
     def test_search_with_partial_course_name(self, vector_store_with_data):
         """Test search with partial course name (fuzzy matching)"""
         results = vector_store_with_data.search(
-            query="machine learning",
-            course_name="Test Course"  # Partial name
+            query="machine learning", course_name="Test Course"  # Partial name
         )
 
         assert not results.is_empty()
@@ -93,30 +91,25 @@ class TestVectorStore:
 
     def test_search_with_lesson_filter(self, vector_store_with_data):
         """Test search with lesson number filter"""
-        results = vector_store_with_data.search(
-            query="learning",
-            lesson_number=1
-        )
+        results = vector_store_with_data.search(query="learning", lesson_number=1)
 
         assert not results.is_empty()
 
         # Verify all results are from lesson 1
         for meta in results.metadata:
-            assert meta['lesson_number'] == 1
+            assert meta["lesson_number"] == 1
 
     def test_search_with_both_filters(self, vector_store_with_data):
         """Test search with both course and lesson filters"""
         results = vector_store_with_data.search(
-            query="neural networks",
-            course_name="Test Course on AI",
-            lesson_number=2
+            query="neural networks", course_name="Test Course on AI", lesson_number=2
         )
 
         # This should find content from lesson 2
         if not results.is_empty():
             for meta in results.metadata:
-                assert meta['course_title'] == "Test Course on AI"
-                assert meta['lesson_number'] == 2
+                assert meta["course_title"] == "Test Course on AI"
+                assert meta["lesson_number"] == 2
 
     def test_search_no_results(self, vector_store_with_data):
         """Test search that returns no results"""
@@ -131,8 +124,7 @@ class TestVectorStore:
     def test_search_invalid_course(self, vector_store_with_data):
         """Test search with non-existent course name"""
         results = vector_store_with_data.search(
-            query="machine learning",
-            course_name="Non-Existent Course XYZ"
+            query="machine learning", course_name="Non-Existent Course XYZ"
         )
 
         assert results.error is not None
@@ -166,6 +158,6 @@ class TestVectorStore:
         """Test retrieving all courses metadata"""
         metadata = vector_store_with_data.get_all_courses_metadata()
         assert len(metadata) == 1
-        assert metadata[0]['title'] == "Test Course on AI"
-        assert 'lessons' in metadata[0]
-        assert len(metadata[0]['lessons']) == 3
+        assert metadata[0]["title"] == "Test Course on AI"
+        assert "lessons" in metadata[0]
+        assert len(metadata[0]["lessons"]) == 3
