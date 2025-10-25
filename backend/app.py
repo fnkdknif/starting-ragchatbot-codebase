@@ -76,7 +76,7 @@ async def query_documents(request: QueryRequest):
 
         print(f"Error in query_documents: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/courses", response_model=CourseStats)
@@ -89,7 +89,7 @@ async def get_course_stats():
             course_titles=analytics["course_titles"],
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.on_event("startup")
