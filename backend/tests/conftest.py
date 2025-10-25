@@ -6,18 +6,16 @@ import os
 import shutil
 import sys
 import tempfile
-from typing import List, Tuple
-from unittest.mock import MagicMock, AsyncMock
-from fastapi.testclient import TestClient
 
 import pytest
+from fastapi.testclient import TestClient
 
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from config import Config
-from rag_system import RAGSystem
 from models import Course, CourseChunk, Lesson
+from rag_system import RAGSystem
 from search_tools import CourseOutlineTool, CourseSearchTool, ToolManager
 from vector_store import VectorStore
 
@@ -223,10 +221,10 @@ def test_rag_system(test_config, mock_course_data):
 @pytest.fixture
 def test_app(test_rag_system):
     """Create a test FastAPI app without static file mounting"""
+
     from fastapi import FastAPI, HTTPException
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
-    from typing import List, Optional, Dict
 
     # Create test app
     app = FastAPI(title="Course Materials RAG System - Test", root_path="")
@@ -243,16 +241,16 @@ def test_app(test_rag_system):
     # Request/Response models
     class QueryRequest(BaseModel):
         query: str
-        session_id: Optional[str] = None
+        session_id: str | None = None
 
     class QueryResponse(BaseModel):
         answer: str
-        sources: List[Dict[str, Optional[str]]]
+        sources: list[dict[str, str | None]]
         session_id: str
 
     class CourseStats(BaseModel):
         total_courses: int
-        course_titles: List[str]
+        course_titles: list[str]
 
     # Endpoints
     @app.post("/api/query", response_model=QueryResponse)
@@ -270,7 +268,7 @@ def test_app(test_rag_system):
                 session_id=session_id
             )
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
     @app.get("/api/courses", response_model=CourseStats)
     async def get_course_stats():
@@ -281,7 +279,7 @@ def test_app(test_rag_system):
                 course_titles=analytics["course_titles"]
             )
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
     return app
 
@@ -303,8 +301,6 @@ def mock_rag_system(test_config, mock_course_data):
     rag.vector_store.add_course_content(chunks)
 
     # Mock the query method to avoid real AI calls
-    original_query = rag.query
-
     def mock_query(query: str, session_id: str):
         # Return mock response
         return (
@@ -326,9 +322,9 @@ def mock_rag_system(test_config, mock_course_data):
 @pytest.fixture
 def mock_app(test_config, mock_course_data, mocker):
     """Create a test FastAPI app with mocked AI generator"""
+
     from fastapi import FastAPI, HTTPException
     from pydantic import BaseModel
-    from typing import List, Optional, Dict
 
     # Create RAG system with test data
     rag = RAGSystem(test_config)
@@ -364,16 +360,16 @@ def mock_app(test_config, mock_course_data, mocker):
 
     class QueryRequest(BaseModel):
         query: str
-        session_id: Optional[str] = None
+        session_id: str | None = None
 
     class QueryResponse(BaseModel):
         answer: str
-        sources: List[Dict[str, Optional[str]]]
+        sources: list[dict[str, str | None]]
         session_id: str
 
     class CourseStats(BaseModel):
         total_courses: int
-        course_titles: List[str]
+        course_titles: list[str]
 
     @app.post("/api/query", response_model=QueryResponse)
     async def query_documents(request: QueryRequest):
@@ -382,7 +378,7 @@ def mock_app(test_config, mock_course_data, mocker):
             answer, sources = rag.query(request.query, session_id)
             return QueryResponse(answer=answer, sources=sources, session_id=session_id)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
     @app.get("/api/courses", response_model=CourseStats)
     async def get_course_stats():
@@ -393,7 +389,7 @@ def mock_app(test_config, mock_course_data, mocker):
                 course_titles=analytics["course_titles"]
             )
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
     return app
 
