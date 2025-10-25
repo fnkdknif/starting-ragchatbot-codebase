@@ -1,10 +1,9 @@
 name: Claude Code Quality Check
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -42,10 +41,10 @@ jobs:
       - name: Claude Code Analysis
         uses: anthropics/claude-code-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          mode: analyze
-          focus: |
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Please analyze this pull request focusing on:
             - Code quality and best practices
             - Security vulnerabilities
             - Performance optimizations
