@@ -24,6 +24,9 @@ class Config:
     MAX_RESULTS: int = 5  # Maximum search results to return
     MAX_HISTORY: int = 2  # Number of conversation messages to remember
 
+    # Feature flags (for testing)
+    ENABLE_DEBUG_MODE: bool = False  # Enable detailed logging
+
     # Database paths
     CHROMA_PATH: str = "./chroma_db"  # ChromaDB storage location
 
