@@ -205,6 +205,7 @@ def mock_anthropic_response_final():
 
 # API Testing Fixtures
 
+
 @pytest.fixture
 def test_rag_system(test_config, mock_course_data):
     """Create a RAGSystem instance for testing"""
@@ -262,11 +263,7 @@ def test_app(test_rag_system):
 
             answer, sources = test_rag_system.query(request.query, session_id)
 
-            return QueryResponse(
-                answer=answer,
-                sources=sources,
-                session_id=session_id
-            )
+            return QueryResponse(answer=answer, sources=sources, session_id=session_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -276,7 +273,7 @@ def test_app(test_rag_system):
             analytics = test_rag_system.get_course_analytics()
             return CourseStats(
                 total_courses=analytics["total_courses"],
-                course_titles=analytics["course_titles"]
+                course_titles=analytics["course_titles"],
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
@@ -310,9 +307,9 @@ def mock_rag_system(test_config, mock_course_data):
                     "course_title": "Test Course on AI",
                     "lesson_number": 1,
                     "course_link": "https://example.com/course",
-                    "lesson_link": "https://example.com/lesson/1"
+                    "lesson_link": "https://example.com/lesson/1",
                 }
-            ]
+            ],
         )
 
     rag.query = mock_query
@@ -333,27 +330,27 @@ def mock_app(test_config, mock_course_data, mocker):
     rag.vector_store.add_course_content(chunks)
 
     # Mock the AI generator's generate_response method
-    def mock_generate_response(query, conversation_history=None, tools=None, tool_manager=None):
+    def mock_generate_response(
+        query, conversation_history=None, tools=None, tool_manager=None
+    ):
         return "This is a mock response about machine learning."
 
     mocker.patch.object(
-        rag.ai_generator,
-        'generate_response',
-        side_effect=mock_generate_response
+        rag.ai_generator, "generate_response", side_effect=mock_generate_response
     )
 
     # Also need to mock tool manager sources
     mocker.patch.object(
         rag.tool_manager,
-        'get_last_sources',
+        "get_last_sources",
         return_value=[
             {
                 "course_title": "Test Course on AI",
                 "lesson_number": "1",
                 "course_link": "https://example.com/course",
-                "lesson_link": "https://example.com/lesson/1"
+                "lesson_link": "https://example.com/lesson/1",
             }
-        ]
+        ],
     )
 
     app = FastAPI(title="Course Materials RAG System - Mock Test")
@@ -386,7 +383,7 @@ def mock_app(test_config, mock_course_data, mocker):
             analytics = rag.get_course_analytics()
             return CourseStats(
                 total_courses=analytics["total_courses"],
-                course_titles=analytics["course_titles"]
+                course_titles=analytics["course_titles"],
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
